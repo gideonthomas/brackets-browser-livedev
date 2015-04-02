@@ -73,21 +73,12 @@ define(function (require, exports, module) {
      * If a livedoc exists, serves the instrumented version of the file as as a blob URL.
      * Otherwise, it serves only the file's contents as a blob URL.
      */
-    HTMLServer.prototype.serveLiveDoc = function(url, callback) {
+    HTMLServer.prototype.serveLiveDoc = function(url) {
         var path = BlobUtils.getFilename(url);
         var liveDocument = this._liveDocuments[path];
+        var rewrittenHtml = Rewriter.rewrite(path, liveDocument.getResponseData().body);
 
-        Rewriter.rewrite(path, liveDocument.getResponseData().body, function(err, html) {
-            if (err) {
-                callback(err);
-                return;
-            }
-
-            // Convert rewritten HTML to a Blob URL Object
-            var url = Content.toURL(html, "text/html");
-
-            callback(null, url);
-        });
+        return Content.toURL(rewrittenHtml, "text/html");
     };
 
     exports.HTMLServer = HTMLServer;
